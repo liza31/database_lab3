@@ -1,0 +1,38 @@
+[project]
+
+# Project metadata
+
+# -- General info
+name = "WWWeather.Core"
+version = "0.1.0"
+description = """
+WWWeather application core package:
+declares the application domain model and provides interfaces for data repository management
+as well as data export and import from external feeds.
+"""
+
+# -- README file
+readme = "README.md"
+
+# -- Required Python version
+requires-python = ">=3.10"
+
+# -- Required pip packages
+dependencies = [
+    "tzdata~=2024.1"
+]
+
+
+[build-system]
+
+# Project build backend
+
+requires = ["setuptools >= 69.0.0"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools]
+
+# Project packages & sources
+
+packages = {find = {where = ["src"], namespaces = true}}
