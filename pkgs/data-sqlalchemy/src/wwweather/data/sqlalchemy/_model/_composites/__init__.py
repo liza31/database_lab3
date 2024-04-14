@@ -1,0 +1,3 @@
+from ._air_temp import make_composite__AirTemp
+from ._wind_speed import make_composite__WindSpeed
+from ._atm_pressure import make_composite__AtmPressure

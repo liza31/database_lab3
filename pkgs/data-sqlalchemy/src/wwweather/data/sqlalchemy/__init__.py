@@ -1,0 +1,6 @@
+from ._model import model_metadata
+
+from ._repository_manager import SQLAlchemyRecordsRepositoryManager
+
+from ._repository_manager_factory import SQLAlchemyRecordsRepositoryManagerFactory
+reposmaker = SQLAlchemyRecordsRepositoryManagerFactory

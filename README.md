@@ -59,3 +59,4 @@ _(__*__ — columns taken into the project's domain model as virtual (non-stored
 ### Application side
 
 * Application programming language: [**Python**](https://www.python.org/)
+* Application ORM-framework: [**SQLAlchemy**](https://pypi.org/project/SQLAlchemy/)

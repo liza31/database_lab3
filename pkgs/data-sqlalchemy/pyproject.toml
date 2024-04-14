@@ -1,0 +1,39 @@
+[project]
+
+# Project metadata
+
+# -- General info
+name = "WWWeather.Data-SQLAlchemy"
+version = "0.1.0"
+description = """
+WWWeather application storage implementation package:
+implements WWWeather.Core weather records repository interface
+for SQLAlchemy-driven database storage.
+"""
+
+# -- README file
+readme = "README.md"
+
+# -- Required Python version
+requires-python = ">=3.10"
+
+# -- Required pip packages
+dependencies = [
+    "SQLAlchemy==2.0.29",
+    "WWWeather.Core==0.1.0"
+]
+
+
+[build-system]
+
+# Project build backend
+
+requires = ["setuptools >= 69.0.0"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools]
+
+# Project packages & sources
+
+packages = {find = {where = ["src"], namespaces = true}}
