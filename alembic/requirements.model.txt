@@ -1,0 +1,3 @@
+# WWWeather 'WWWeather.Data-SQLAlchemy' package
+# to supply 'Alembic' with 'SQLAlchemy' metadata for the 'WWWeather' db model
+WWWeather.Data-SQLAlchemy==0.1.0

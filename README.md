@@ -60,3 +60,8 @@ _(__*__ — columns taken into the project's domain model as virtual (non-stored
 
 * Application programming language: [**Python**](https://www.python.org/)
 * Application ORM-framework: [**SQLAlchemy**](https://pypi.org/project/SQLAlchemy/)
+
+### Database side
+
+* Database management systems: [**PostgreSQL**](https://www.postgresql.org/), [**MySQL**](https://www.mysql.com/)
+* Database migration tool: [**Alembic**](https://pypi.org/project/alembic/)
