@@ -1,0 +1,169 @@
+services:
+
+  db_postgres:
+    image: postgres:latest
+    container_name: wwweather-db_postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - wwweather-network
+    volumes:
+      - db_postgres-data:/var/lib/postgresql/data
+    secrets:
+      - db_postgres-password
+    environment:
+      POSTGRES_DB: wwweather_db
+      POSTGRES_USER: liza31
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_postgres-password
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-d", "wwweather_db", "-U", "liza31" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - postgres
+      - postgres-upgrade
+      - postgres-import_origin
+      - postgres-export
+      - postgres-import_export
+
+  alembic_postgres-upgrade:
+    image: wwweather/exts/alembic_unlinked:ext0
+    build:
+      context: ./alembic
+      dockerfile: unlinked.Dockerfile
+    container_name: wwweather-alembic_unlinked_postgres-upgrade
+    networks:
+      - wwweather-network
+    volumes:
+      - ./alembic/alembic.ini:/wwweather/alembic/alembic.ini:ro
+      - ./alembic/versions:/wwweather/alembic/versions:ro
+    secrets:
+      - db_postgres-password
+    command: [
+      "-x", "db.sqlalchemy.dialect=postgresql",
+      "-x", "db.sqlalchemy.driver=psycopg2",
+      "-x", "db.server.host=db_postgres",
+      "-x", "db.server.port=5432",
+      "-x", "db.dbname=wwweather_db",
+      "-x", "db.user=liza31",
+      "-x", "db.pass=%/run/secrets/db_postgres-password",
+      "upgrade", "head"
+    ]
+    depends_on:
+      db_postgres:
+        condition: service_healthy
+    profiles:
+      - postgres-upgrade
+      - postgres-import_origin
+      - postgres-export
+      - postgres-import_export
+
+  cli_postgres-import_origin:
+    image: wwweather/cli:0.1.0.ext0
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    container_name: wwweather-cli_0.1.0_postgres-import_origin
+    networks:
+      - wwweather-network
+    volumes:
+      - ./.data:/data:ro
+    secrets:
+      - db_postgres-password
+    command: [
+      "--db.sqlalchemy.dialect", "postgresql",
+      "--db.sqlalchemy.driver", "psycopg2",
+      "--db.server.host", "db_postgres",
+      "--db.server.port", "5432",
+      "--db.dbname", "wwweather_db",
+      "--db.user", "liza31",
+      "--db.pass", "%/run/secrets/db_postgres-password",
+      "import",
+      "/data/GlobalWeatherRepository.csv",
+      "--feed.encoding", "utf-8"
+    ]
+    depends_on:
+      db_postgres:
+        condition: service_healthy
+      alembic_postgres-upgrade:
+        condition: service_completed_successfully
+    profiles:
+      - postgres-import_origin
+
+  cli_postgres-export:
+    image: wwweather/cli:0.1.0.ext0
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    container_name: wwweather-cli_0.1.0_postgres-export
+    networks:
+      - wwweather-network
+    volumes:
+      - ./.out:/out
+    secrets:
+      - db_postgres-password
+    command: [
+      "--db.sqlalchemy.dialect", "postgresql",
+      "--db.sqlalchemy.driver", "psycopg2",
+      "--db.server.host", "db_postgres",
+      "--db.server.port", "5432",
+      "--db.dbname", "wwweather_db",
+      "--db.user", "liza31",
+      "--db.pass", "%/run/secrets/db_postgres-password",
+      "export",
+      "/out/wwweather_db-export.csv",
+      "--dest.encoding", "utf-8"
+    ]
+    depends_on:
+      db_postgres:
+        condition: service_healthy
+      alembic_postgres-upgrade:
+        condition: service_completed_successfully
+    profiles:
+      - postgres-export
+
+  cli_postgres-import_export:
+    image: wwweather/cli:0.1.0.ext0
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    container_name: wwweather-cli_0.1.0_postgres-import_export
+    networks:
+      - wwweather-network
+    volumes:
+      - ./.out:/out:ro
+    secrets:
+      - db_postgres-password
+    command: [
+      "--db.sqlalchemy.dialect", "postgresql",
+      "--db.sqlalchemy.driver", "psycopg2",
+      "--db.server.host", "db_postgres",
+      "--db.server.port", "5432",
+      "--db.dbname", "wwweather_db",
+      "--db.user", "liza31",
+      "--db.pass", "%/run/secrets/db_postgres-password",
+      "import",
+      "/out/wwweather_db-export.csv",
+      "--feed.encoding", "utf-8"
+    ]
+    depends_on:
+      db_postgres:
+        condition: service_healthy
+      alembic_postgres-upgrade:
+        condition: service_completed_successfully
+    profiles:
+      - postgres-import_export
+
+
+networks:
+  wwweather-network:
+
+
+volumes:
+  db_postgres-data:
+
+
+secrets:
+  db_postgres-password:
+    file: ./.secrets/db_postgres-password.txt

@@ -65,3 +65,7 @@ _(__*__ — columns taken into the project's domain model as virtual (non-stored
 
 * Database management systems: [**PostgreSQL**](https://www.postgresql.org/), [**MySQL**](https://www.mysql.com/)
 * Database migration tool: [**Alembic**](https://pypi.org/project/alembic/)
+
+### Other tools
+
+* Containerization: [**Docker**](https://www.docker.com/)

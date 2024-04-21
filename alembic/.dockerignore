@@ -1,0 +1,45 @@
+# Ignore everything by default
+*
+
+
+# Include script folder, configuration & requirements files
+!migrations/
+!requirements.db_drivers.txt
+!requirements.model.txt
+!requirements.txt
+!alembic.ini
+
+
+# Ignore Python Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Python virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore Python distribution / packaging files
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
