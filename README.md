@@ -96,3 +96,124 @@ or something like that, consists of two main parts:
   + [**WWWeather.CLI**](cli/README.md) — application simple commandline interface package:  
     provides such basic functionality as running weather records import/export
     and search functionality invocation
+
+
+## Application deployment & step-to-step migration
+
+The primary way of **WWWeather** application deployment is by using **Docker Compose** 
+for which project includes numerous dockerfiles and [compose configuration](docker-compose.yaml).
+
+However, in order to ease non-routine operations with the **WWWeather CLI** and **Alembic** we will also set up
+a local virtual environment capable of running **Alembic** migrations and/or **WWWeather CLI** operations 
+on the remote (in our case, deployed in **Docker** container) database.
+
+The whole process of the deployment will also be plit by so-called steps — versions of the **WWWeather** project 
+and current repository strictly correspond to the steps of the current laboratory work execution required by its task. 
+
+### Prerequisites
+
+To deploy **WWWeather** application with database server in **Docker** and **Alembic** migration environment, 
+you will need to have the next software installed on your machine:
+
+* **Python** `3.10` or higher
+* **Docker Desktop** or **Docker Engine**/**Docker CLI** with the **Compose** plugin
+
+### Preparations
+
+#### Virtual environment
+
+For local operations, we need to set up a **Python** virtual environment 
+in the `.venv` directory in the root of our project — it can be done via the next command:
+
+```shell
+python -m venv .venv
+```
+
+Then activate it:
+
+* on Linux/MacOS:
+
+  ```shell
+  source venv/bin/activate
+  ```
+
+* on Windows:
+
+  ```shell
+  .venv/Scripts/activate
+  ```
+
+#### Data files and work directories
+
+To run scenarios, declared in further steps, we need to create a couple 
+of special work folders in the root of our project:
+
+* `.secrets` — secrets directory - will be used with **Docker Compose**
+* `.data` — large data files directory — to load dataset files from
+* `.out` — output directory — to save weather records export files into
+
+Then we need to download the dataset CSV file into the `.data` directory,
+the file itself should be named `GlobalWeatherRepository.csv`.
+
+### Step 01
+
+**Database schema:** `solid table`  
+**Database server(s):** `PostgreSQL`  
+**WWWeather.Core version:** `0.1.0`
+
+In the current step we will initialize a **PostgreSQL** application database 
+with the single table `weather_records` and import data from dataset CSV feed into it.
+
+1. Start with installing **WWWeather** packages into the local virtual environment:
+   
+   ```shell
+   pip install -e pkgs\core -e pkgs\data-csv\ -e pkgs\data-sqlalchemy\ -e cli\
+   ```
+
+2. Build **Docker** images of distribution files for these packages:
+
+   ```shell
+   docker build -f pkgs/core/dist.Dockerfile -t wwweather/dists/core:0.1.0 pkgs/core
+   docker build -f pkgs/data-csv/dist.Dockerfile -t wwweather/dists/data-csv:0.1.0 pkgs/data-csv
+   docker build -f pkgs/data-sqlalchemy/dist.Dockerfile -t wwweather/dists/data-sqlalchemy:0.1.0 pkgs/data-sqlalchemy
+   docker build -f cli/dist.Dockerfile -t wwweather/dists/cli:0.1.0 cli
+   ```
+
+3. Create `db_postgres-password.txt` password file for the **PostgreSQL** application database 
+   in the `.secrets` subdirectory of the project root directory, write a password to it as a single line and save.
+
+4. Build a **Docker Compose** for the current configuration:
+
+   ```shell
+   docker-compose build --no-cache
+   ```
+
+5. Run **Docker Compose** `postgres-import_origin` profile to initialize the **PostgreSQL** database, 
+   apply base migration to the `model-0.1.0` revision to it and perform weather records import 
+   from the dataset `GlobalWeatherRepository.csv` file:
+
+   ```shell
+   docker compose --profile postgres-import_origin up -d --force-recreate
+   ```
+
+#### Available Docker Compose profiles
+
+At the moment of the [**Step 01**](#step-01) the [compose configuration](docker-compose.yaml) contains next profiles:
+
+* `postgres` — 
+  run a **PostgreSQL** server for the application database
+
+* `postgres-upgrade` — 
+  run **Alembic** `upgrade` command to upgrade a **PostgreSQL** hema to the latest available version
+
+* `postgres-import_origin` — 
+  run **WWWeather.CLI** `import` command to import weather records 
+  from the `.data/GlobalWeatherRepoitory.csv` file into the application database
+
+* `postgres-export` — 
+  run **WWWeather.CLI** `export` command to export weather records 
+  from the application database into the `.out/wwweather_db-export.csv` file
+
+* `postgres-import_origin` — 
+  run **WWWeather.CLI** `import` command to import weather records 
+  from the `.out/wwweather_db-export.csv` file into the application database
