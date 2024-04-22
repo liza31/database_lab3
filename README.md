@@ -69,3 +69,30 @@ _(__*__ — columns taken into the project's domain model as virtual (non-stored
 ### Other tools
 
 * Containerization: [**Docker**](https://www.docker.com/)
+
+
+## Project structure
+
+The project, created for the current laboratory work and called **WWWeather** aka "_World Wide Weather_" 
+or something like that, consists of two main parts:
+
+* Database in charge of storing all weather data with [**Alembic** migration environment](alembic/README.md) 
+  to provide version tracking and migrations application 
+
+* Application built in accordance with the _Layered architecture_ approach 
+  and consists of multiple **Python** packages:
+
+  + [**WWWeather.Core**](pkgs/core/README.md) — application core package:  
+    declares the application _Domain model_ and provides interfaces for data repository management 
+    as well as data export and import from external feeds
+ 
+  + [**WWWeather.Data-CSV**](pkgs/data-csv/README.md) — application CSV import/export adapter package:  
+    provides **WWWeather.Core** weather records dumping/loading interfaces 
+    implementations for the CSV format
+  + [**WWWeather.Data-SQLAlchemy**](pkgs/data-sqlalchemy/README.md) — application storage implementation package:  
+    implements WWWeather.Core weather records repository interface 
+    for SQLAlchemy-driven database storage
+
+  + [**WWWeather.CLI**](cli/README.md) — application simple commandline interface package:  
+    provides such basic functionality as running weather records import/export
+    and search functionality invocation
