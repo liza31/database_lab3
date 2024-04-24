@@ -4,7 +4,7 @@
 
 # -- General info
 name = "WWWeather.Core"
-version = "0.1.0"
+version = "0.2.0"
 description = """
 WWWeather application core package:
 declares the application domain model and provides interfaces for data repository management

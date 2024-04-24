@@ -1,5 +1,5 @@
 from typing import Any, Literal
-from collections.abc import Iterable, Sequence, Mapping, Callable
+from collections.abc import Iterable, Collection, Sequence, Mapping, Callable
 from dataclasses import dataclass, fields
 
 from itertools import islice
@@ -17,7 +17,7 @@ from wwweather.data.utils import IterResultsPage, Paginated
 # noinspection PyUnresolvedReferences
 from wwweather.data.storage import ReleasableResourceMixin, ABCRecordsRepositoryManager, RecordsSearchParams
 
-from wwweather.data.model import WeatherRecord
+from wwweather.data.model import DataAirQuality, WeatherRecord
 
 
 class SQLAlchemyRecordsRepositoryManager(ABCRecordsRepositoryManager):
@@ -28,27 +28,45 @@ class SQLAlchemyRecordsRepositoryManager(ABCRecordsRepositoryManager):
     **NOTE:** This class encapsulates a releasable resource, supports :class:`ReleasableResourceMixin` abstraction
     and requires proper resource realising through using class as a context management or `release()` method invocation
     """
-    
+
     @classmethod
-    def _model_asdict(cls, instance: dataclass, *, drop_none: bool = False) -> Mapping[str, Any]:
+    def _model_asdict(cls,
+                      instance: dataclass,
+                      *,
+                      exclude: Collection[str] = None,
+                      default: Iterable[tuple[str, Any]] | Mapping[str, Any] = None,
+                      drop_none: bool = False) -> Mapping[str, Any]:
         """
         Unpack model object to an attributes key-value :class:`Mapping`
+        with simple post-processing options
 
         :param instance: model object to be unpacked
+
+        :param exclude: attributes to be excluded from the resulting mapping (optional)
+        :param default: default key-value pairs to be included in the resulting mapping (optional)
         :param drop_none: whether to drop attributes with `None` values from the resulting mapping (`False` by default)
 
         :return: unpacked attributes key-value :class:`Mapping`
         """
 
-        # Extract key-value pairs iterable from the given instance
-        kv_iter = ((attr.name, getattr(instance, attr.name)) for attr in fields(instance))
+        # Handle excluded attrs list input
+        exclude = exclude or tuple()
 
-        # Apply None filtering if needed
+        # Init unpacked mapping with defaults
+        mapping = dict(default) if default is not None else dict()
+
+        # Extract key-value pairs iterable from the given instance
+
+        # -- Extract all non-excluded attributes
+        kv_iter = ((attr.name, getattr(instance, attr.name)) for attr in fields(instance) if attr.name not in exclude)
+
+        # -- Apply None filtering if needed
         if drop_none:
             kv_iter = filter(lambda item: item[1] is not None, kv_iter)
 
-        # Create and return unpacked attributes mapping
-        return dict(kv_iter)
+        # Update unpacked mapping with extracted key-value pairs and return
+        mapping.update(kv_iter)
+        return mapping
 
     @classmethod
     def _generate_search_statement(cls, params: RecordsSearchParams) -> BinaryExpression | BooleanClauseList | None:
@@ -136,13 +154,29 @@ class SQLAlchemyRecordsRepositoryManager(ABCRecordsRepositoryManager):
             nonlocal ignore_duplicates, records_inserted
 
             # Extract insertion values from the given records
-            block_vals = [self._model_asdict(record, drop_none=True) for record in block_records]
+
+            # -- Extract values for the WeatherRecord entities ('weather_records' table)
+            block_weather_records_vals = [
+                self._model_asdict(record, exclude=['air_pollution'], drop_none=True)
+                for record in block_records
+            ]
+
+            # -- Extract values for the nested DataAirQuality entities ('air_quality_records' table)
+            block_air_quality_records_vals = [
+                self._model_asdict(record.air_quality, default=dict(uuid=record.uuid), drop_none=True)
+                for record in block_records
+            ]
 
             try:
 
                 # Use bulk insert within a session transaction to import given block
                 with self._session.begin():
-                    self._session.execute(insert(WeatherRecord), block_vals)
+
+                    # -- Import WeatherRecord entities to the 'weather_records' table
+                    self._session.execute(insert(WeatherRecord), block_weather_records_vals)
+
+                    # -- Import nested DataAirQuality entities to the 'air_quality_records' table
+                    self._session.execute(insert(DataAirQuality), block_air_quality_records_vals)
 
             except IntegrityError as dup_err:
 
@@ -156,7 +190,7 @@ class SQLAlchemyRecordsRepositoryManager(ABCRecordsRepositoryManager):
             else:
 
                 # Increase inserted records counter on success
-                records_inserted += len(block_vals)
+                records_inserted += len(block_weather_records_vals)
 
         try:
 

@@ -4,7 +4,7 @@
 
 # -- General info
 name = "WWWeather.Data-CSV"
-version = "0.1.0"
+version = "0.2.0"
 description = """
 WWWeather application CSV import/export adapter package:
 provides WWWeather.Core weather records dumping/loading interfaces
@@ -19,7 +19,7 @@ requires-python = ">=3.10"
 
 # -- Required pip packages
 dependencies = [
-    "WWWeather.Core==0.1.0"
+    "WWWeather.Core==0.2.0"
 ]
 
 

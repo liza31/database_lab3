@@ -151,29 +151,38 @@ class CSVRecordsDumper(ABCRecordsDumper):
             'gust_kph': record.wind_gust.kph if record.wind_gust is not None else None,
             'wind_direction': record.wind_direction.name if record.wind_direction is not None else None,
 
-            # -- Air quality data columns
-
-            'air_quality_us-epa-index': record.aqi_epa,
-            'air_quality_gb-defra-index': record.aqi_defra,
-
             # Additional data columns
 
             'condition_text': record.conditions_report
         }
 
-        # Unpack record.air_toxics attribute
-        if record.air_toxics is not None:
+        # Unpack record.air_quality attribute
+        if record.air_quality is not None:
 
-            air_toxics = record.air_toxics
+            air_quality = record.air_quality
 
             data.update([
-                ('air_quality_Carbon_Monoxide', air_toxics.co),
-                ('air_quality_Ozone', air_toxics.o3),
-                ('air_quality_Nitrogen_dioxide', air_toxics.no2),
-                ('air_quality_Sulphur_dioxide', air_toxics.so2),
-                ('air_quality_PM2.5', air_toxics.pm25),
-                ('air_quality_PM10', air_toxics.pm10),
+
+                # -- Air quality indexes data columns
+
+                ('air_quality_us-epa-index', air_quality.aqi_epa),
+                ('air_quality_gb-defra-index', air_quality.aqi_defra)
+
             ])
+
+            # -- Unpack nested record.air_quality.toxics
+            if record.air_quality.toxics is not None:
+
+                toxics = air_quality.toxics
+
+                data.update([
+                    ('air_quality_Carbon_Monoxide', toxics.co),
+                    ('air_quality_Ozone', toxics.o3),
+                    ('air_quality_Nitrogen_dioxide', toxics.no2),
+                    ('air_quality_Sulphur_dioxide', toxics.so2),
+                    ('air_quality_PM2.5', toxics.pm25),
+                    ('air_quality_PM10', toxics.pm10),
+                ])
 
         # Return unpacked data
         return data

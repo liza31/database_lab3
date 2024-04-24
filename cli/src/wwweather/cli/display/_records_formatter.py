@@ -310,13 +310,16 @@ class DefaultWeatherRecordsFormatter(ABCWeatherRecordsFormatter, _DefaultWeather
 
                         # -- Air quality measurements data rows
 
-                        *((self.air_toxic_pattern % val
-                           for val in asdict(record.air_toxics).values()
-                           if val is not None)
-                          if record.air_toxics is not None else tuple()),
-
-                        record.aqi_epa,
-                        record.aqi_defra,
+                        *(chain(
+                            (self.air_toxic_pattern % val
+                             for val in asdict(record.air_quality.toxics).values()
+                             if val is not None)
+                            if record.air_quality.toxics is not None else tuple(),
+                            (
+                                record.air_quality.aqi_epa,
+                                record.air_quality.aqi_defra
+                            )
+                        ) if record.air_quality is not None else tuple()),
 
                         SEPARATING_LINE,
 

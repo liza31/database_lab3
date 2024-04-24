@@ -217,3 +217,41 @@ At the moment of the [**Step 01**](#step-01) the [compose configuration](docker-
 * `postgres-import_origin` — 
   run **WWWeather.CLI** `import` command to import weather records 
   from the `.out/wwweather_db-export.csv` file into the application database
+
+### Step 02
+
+**Database schema:** `1-to-1 tables`
+**Database server(s):** `PostgreSQL`  
+**WWWeather.Core version:** `0.2.0`
+
+In the current step we will migrate the application database located on the **PostgreSQL** server 
+to the new schema version, separating new `air_quality_records` table from the original `weather_records` table
+with _1-to-1_ relation between them.
+
+1. Reinstall **WWWeather** application packages in the local virtual environment
+
+   ```shell
+   pip uninstall -y WWWeather.CLI WWWeather.Data-SQLAlchemy WWWeather.Data-CSV WWWeather.Core
+   pip install -e pkgs\core -e pkgs\data-csv\ -e pkgs\data-sqlalchemy\ -e cli\
+   ```
+
+2. Build **Docker** images of distribution files for the new versions of these packages:
+
+   ```shell
+   docker build -f pkgs/core/dist.Dockerfile -t wwweather/dists/core:0.2.0 pkgs/core
+   docker build -f pkgs/data-csv/dist.Dockerfile -t wwweather/dists/data-csv:0.2.0 pkgs/data-csv
+   docker build -f pkgs/data-sqlalchemy/dist.Dockerfile -t wwweather/dists/data-sqlalchemy:0.2.0 pkgs/data-sqlalchemy
+   docker build -f cli/dist.Dockerfile -t wwweather/dists/cli:0.2.0 cli
+   ```
+   
+3. Re-build a **Docker Compose** for the current configuration:
+
+   ```shell
+   docker-compose build --no-cache
+   ```
+
+4. Run **Docker Compose** `postgres-upgrade` profile to apply migration up to the `model-0.2.0` revision:
+
+   ```shell
+   docker compose --profile postgres-upgrade up -d --force-recreate
+   ```

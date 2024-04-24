@@ -10,3 +10,4 @@ Package-global :class:`ModelsMapper` instance to register all individual models 
 # Import all mapping methods, invoking their registration
 
 from ._weather_records import map__WeatherRecord
+from ._air_quality_records import map__DataAirQuality

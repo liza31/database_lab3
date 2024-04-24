@@ -5,7 +5,8 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from . import GeoPosition, AirTemp, AtmPressure, WindSpeed, RoseDirection, AirToxics
+from . import GeoPosition, AirTemp, AtmPressure, WindSpeed, RoseDirection
+from . import DataAirQuality
 
 
 @dataclass
@@ -115,19 +116,9 @@ class WeatherRecord:
 
     # -- Air quality measurements data attributes
 
-    air_toxics: Optional[AirToxics] = field(default=None)
+    air_quality: Optional[DataAirQuality] = field(default=None)
     """
-    Air toxics concentration measurements data
-    """
-
-    aqi_epa: Optional[int] = field(default=None)
-    """
-    Air Quality Index calculated by methodology of US Environmental Protection Agency (EPA)
-    """
-
-    aqi_defra: Optional[int] = field(default=None)
-    """
-    Air Quality Index calculated by methodology of UK Department for Environment Food & Rural Affairs (DEFRA)
+    Air quality scoring and toxics measurements data
     """
 
     # Additional data attributes

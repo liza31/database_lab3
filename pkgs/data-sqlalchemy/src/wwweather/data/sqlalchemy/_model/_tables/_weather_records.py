@@ -4,10 +4,10 @@ from sqlalchemy import Table, Column, UniqueConstraint, Index
 from sqlalchemy import SmallInteger, Float, Uuid, String, Enum, DateTime
 
 from sqlalchemy.orm import registry
-from sqlalchemy.orm import composite
+from sqlalchemy.orm import composite, relationship
 
-from wwweather.data.model import GeoPosition, AirTemp, AtmPressure, WindSpeed, RoseDirection, AirToxics
-from wwweather.data.model import WeatherRecord
+from wwweather.data.model import GeoPosition, AirTemp, AtmPressure, WindSpeed, RoseDirection
+from wwweather.data.model import DataAirQuality, WeatherRecord
 
 from . import model_mapper
 
@@ -73,18 +73,6 @@ def map__WeatherRecord(reg: registry):
             Column('wind_gust_kmh', Float(precision=4), nullable=True),
             Column('wind_direction', Enum(RoseDirection), nullable=True),
 
-            # -- -- Air quality data columns
-            
-            Column('air_toxic_co', Float(precision=9), nullable=True),
-            Column('air_toxic_o3', Float(precision=5), nullable=True),
-            Column('air_toxic_no2', Float(precision=5), nullable=True),
-            Column('air_toxic_so2', Float(precision=5), nullable=True),
-            Column('air_toxic_pm25', Float(precision=6), nullable=True),
-            Column('air_toxic_pm10', Float(precision=6), nullable=True),
-            
-            Column('aqi_epa', SmallInteger, nullable=True),
-            Column('aqi_defra', SmallInteger, nullable=True),
-
             # -- Additional data columns
 
             Column('conditions_report', String(256), nullable=True),
@@ -118,6 +106,12 @@ def map__WeatherRecord(reg: registry):
 
         properties={
 
+            # Relationships
+
+            'air_quality': relationship(
+                DataAirQuality, uselist=False, cascade="all, delete-orphan", passive_deletes=True
+            ),
+
             # Composite columns
 
             # -- Key data composite columns
@@ -140,15 +134,6 @@ def map__WeatherRecord(reg: registry):
             # -- -- Wind measurements data composite columns
 
             'wind_speed': composite(WindSpeed.__composite_generate__, 'wind_speed_kmh'),
-            'wind_gust': composite(WindSpeed.__composite_generate__, 'wind_gust_kmh'),
-
-            # -- -- Air quality measurements data composite columns
-
-            'air_toxics': composite(
-                AirToxics,
-                'air_toxic_co', 'air_toxic_o3',
-                'air_toxic_no2', 'air_toxic_so2',
-                'air_toxic_pm25', 'air_toxic_pm10'
-            )
+            'wind_gust': composite(WindSpeed.__composite_generate__, 'wind_gust_kmh')
         }
     )

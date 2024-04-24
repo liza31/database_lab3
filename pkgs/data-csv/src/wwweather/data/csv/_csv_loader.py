@@ -14,7 +14,7 @@ from wwweather.data.utils import IterResultsPage, Paginated
 from wwweather.data.io import ABCRecordsLoader
 
 from wwweather.data.model import GeoPosition, AirTemp, AtmPressure, WindSpeed, RoseDirection, AirToxics
-from wwweather.data.model import WeatherRecord
+from wwweather.data.model import DataAirQuality, WeatherRecord
 
 from . import CSVOpts
 
@@ -95,7 +95,6 @@ class CSVRecordsLoader(ABCRecordsLoader):
 
             local_datetime=datetime.strptime(data['last_updated'], self._csv_opts.datetime_format),
             local_timezone=data['timezone']
-
         )
 
         # -- Check mandatory kwargs has no missing values
@@ -103,8 +102,10 @@ class CSVRecordsLoader(ABCRecordsLoader):
             if val is None:
                 raise KeyError(key)
 
-        # Collect WeatherRecord.air_toxics AirToxics initialization kwargs
-        air_toxics_kwargs = {
+        # Collect WeatherRecord.air_quality DataAirQuality initialization kwargs
+
+        # -- Collect nested WeatherRecord.air_quality.toxics AirToxics initialization kwargs
+        toxics_kwargs = {
             key: float(val) for key, val in [
                 ('co', data.get('air_quality_Carbon_Monoxide')),
                 ('o3', data.get('air_quality_Ozone')),
@@ -112,6 +113,24 @@ class CSVRecordsLoader(ABCRecordsLoader):
                 ('so2', data.get('air_quality_Sulphur_dioxide')),
                 ('pm25', data.get('air_quality_PM2.5')),
                 ('pm10', data.get('air_quality_PM10'))
+            ] if val is not None
+        }
+
+        air_quality_kwargs = {
+            key: val for key, val in [
+
+                # Air toxics concentration measurements data kwargs
+
+                ('toxics',
+                 None if len(toxics_kwargs) == 0 else AirToxics(**toxics_kwargs)),
+
+                # -- Air quality indexes data kwargs
+
+                ('aqi_epa',
+                 None if data.get('air_quality_us-epa-index') is None else int(data['air_quality_us-epa-index'])),
+                ('aqi_defra',
+                 None if data.get('air_quality_gb-defra-index') is None else int(data['air_quality_gb-defra-index'])),
+
             ] if val is not None
         }
 
@@ -156,13 +175,8 @@ class CSVRecordsLoader(ABCRecordsLoader):
 
                 # -- Air quality measurements data attributes
 
-                ('air_toxics',
-                 None if len(air_toxics_kwargs) == 0 else AirToxics(**air_toxics_kwargs)),
-
-                ('aqi_epa',
-                 None if data.get('air_quality_us-epa-index') is None else int(data['air_quality_us-epa-index'])),
-                ('aqi_defra',
-                 None if data.get('air_quality_gb-defra-index') is None else int(data['air_quality_gb-defra-index'])),
+                ('air_quality',
+                 None if len(air_quality_kwargs) == 0 else DataAirQuality(**air_quality_kwargs)),
 
                 # Additional data attributes
 

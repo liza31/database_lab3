@@ -4,7 +4,7 @@
 
 # -- General info
 name = "WWWeather.Data-SQLAlchemy"
-version = "0.1.0"
+version = "0.2.0"
 description = """
 WWWeather application storage implementation package:
 implements WWWeather.Core weather records repository interface
@@ -20,7 +20,7 @@ requires-python = ">=3.10"
 # -- Required pip packages
 dependencies = [
     "SQLAlchemy==2.0.29",
-    "WWWeather.Core==0.1.0"
+    "WWWeather.Core==0.2.0"
 ]
 
 
