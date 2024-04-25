@@ -6,16 +6,16 @@ ARG PYTHON_VERSION=3.10.14
 # -- Required packages distribution image references
 
 # -- -- ARG: 'WWWeather.Core' package required version dists image
-ARG DISTS__CORE=wwweather/dists/core:0.2.0
+ARG DISTS__CORE=wwweather/dists/core:0.3.0
 
 # -- -- ARG: 'WWWeather.Data-CSV' package required version dists image
-ARG DISTS__DATA_CSV=wwweather/dists/data-csv:0.2.0
+ARG DISTS__DATA_CSV=wwweather/dists/data-csv:0.3.0
 
 # -- -- ARG: 'WWWeather.Data-SQLAlchemy' package required version dists image
-ARG DISTS__DATA_SQLALCHEMY=wwweather/dists/data-sqlalchemy:0.2.0
+ARG DISTS__DATA_SQLALCHEMY=wwweather/dists/data-sqlalchemy:0.3.0
 
 # -- -- ARG: 'WWWeather.CLI' package required version dists image
-ARG DISTS__CLI=wwweather/dists/cli:0.2.0
+ARG DISTS__CLI=wwweather/dists/cli:0.3.0
 
 
 # [BASE] STAGE "base"

@@ -1,5 +1,5 @@
 from sqlalchemy import Table, Column, ForeignKey
-from sqlalchemy import SmallInteger, Float, Uuid
+from sqlalchemy import Boolean, SmallInteger, Float, Uuid
 
 from sqlalchemy.orm import registry, composite
 
@@ -48,7 +48,11 @@ def map__DataAirQuality(reg: registry):
             # -- Air quality indexes data columns
 
             Column('aqi_epa', SmallInteger, nullable=True),
-            Column('aqi_defra', SmallInteger, nullable=True)
+            Column('aqi_defra', SmallInteger, nullable=True),
+
+            # -- Additional data columns
+
+            Column('acceptable', Boolean, nullable=True)
         ),
 
         properties={

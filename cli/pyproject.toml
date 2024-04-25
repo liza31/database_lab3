@@ -4,7 +4,7 @@
 
 # -- General info
 name = "WWWeather.CLI"
-version = "0.2.0"
+version = "0.3.0"
 description = """
 WWWeather application simple commandline interface package:
 provides such basic functionality as running weather records import/export
@@ -23,9 +23,9 @@ dependencies = [
 
     "SQLAlchemy==2.0.29",
 
-    "WWWeather.Core==0.2.0",
-    "WWWeather.Data-CSV==0.2.0",
-    "WWWeather.Data-SQLAlchemy==0.2.0"
+    "WWWeather.Core==0.3.0",
+    "WWWeather.Data-CSV==0.3.0",
+    "WWWeather.Data-SQLAlchemy==0.3.0"
 ]
 
 

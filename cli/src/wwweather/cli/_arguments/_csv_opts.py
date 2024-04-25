@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from enum import Enum
 
 from argparse import Namespace
@@ -72,6 +73,16 @@ def char(char_str: str) -> str:
     return char_str
 
 
+def literals_list(literals_str: str) -> Sequence[str]:
+    """
+    Parse list of comma-separated literals from the given string into a :class:`Sequence` of strings
+
+    :return: :class:`Sequence` of separated trimmed string literals
+    """
+
+    return list(map(str.strip, literals_str.split(',')))
+
+
 def setargs_csv_opts(parser, args_fmt: ABCArgsFormatter):
     """
     Add a set of records CSV load/dump options arguments corresponds to those supported by the :class:`CSSVOpts`,
@@ -84,6 +95,11 @@ def setargs_csv_opts(parser, args_fmt: ABCArgsFormatter):
 
     * `datetime_format` - datetime formatting pattern in :func:`time.strftime`/:func:`time.strptime` format
       (defaults to the :attr:`CSVOpts.DEFAULT_FORMATTING_PARAMS`)
+
+    * `true_literals` - boolean `True` literals collection (all lowercase, first is taken for dumping,
+      defaults to the :attr:`CSVOpts.DEFAULT_TRUE_LITERALS`)
+    * `false_literals` - boolean `False` literals collection (all lowercase, first is taken for dumping,
+      defaults to the :attr:`CSVOpts.DEFAULT_FALSE_LITERALS`)
 
     * `csv_dialect` - CSV dialect name (from :func:`csv.list_dialects`)
       (defaults to the :attr:`CSVOpts.CSV_DEFAULT_DIALECT`)
@@ -111,6 +127,23 @@ def setargs_csv_opts(parser, args_fmt: ABCArgsFormatter):
         default=CSVOpts.DEFAULT_DATETIME_FORMAT,
         help="Datetime formatting pattern in the time.strptime()/time.strftime() format "
              f"(defaults to {repr(CSVOpts.DEFAULT_DATETIME_FORMAT.replace('%', '%%'))})."
+    )
+
+    parser.add_argument(
+        *args_fmt.flags_compact('tlt'), *args_fmt.flags('true-literals'),
+        dest=args_fmt.dest('true_literals'), metavar=args_fmt.metavar("TRUE_LITERALS"),
+        type=literals_list,
+        default=None,
+        help=f"Boolean 'True' literals (comma-separated, all lowercase, first is taken for dumping, "
+             f"defaults to {repr(CSVOpts.DEFAULT_TRUE_LITERALS)})"
+    )
+    parser.add_argument(
+        *args_fmt.flags_compact('flt'), *args_fmt.flags('false-literals'),
+        dest=args_fmt.dest('false_literals'), metavar=args_fmt.metavar("FALSE_LITERALS"),
+        type=literals_list,
+        default=None,
+        help=f"Boolean 'False' literals (comma-separated, all lowercase, first is taken for dumping, "
+             f"defaults to {repr(CSVOpts.DEFAULT_FALSE_LITERALS)})"
     )
 
     parser.add_argument(
@@ -198,6 +231,11 @@ def csv_opts_from_context(context: Namespace, attrs_fmt: ABCArgsFormatter) -> CS
     * `datetime_format` - datetime formatting pattern in :func:`time.strftime`/:func:`time.strptime` format
       (defaults to the :attr:`CSVOpts.DEFAULT_FORMATTING_PARAMS`)
 
+    * `true_literals` - boolean `True` literals collection (all lowercase, first is taken for dumping,
+      defaults to the :attr:`CSVOpts.DEFAULT_TRUE_LITERALS`)
+    * `false_literals` - boolean `False` literals collection (all lowercase, first is taken for dumping,
+      defaults to the :attr:`CSVOpts.DEFAULT_FALSE_LITERALS`)
+
     * `csv_dialect` - CSV dialect name (from :func:`csv.list_dialects`)
       (defaults to the :attr:`CSVOpts.DEFAULT_DIALECT`)
 
@@ -230,6 +268,9 @@ def csv_opts_from_context(context: Namespace, attrs_fmt: ABCArgsFormatter) -> CS
             chain(
                 [
                     ('datetime_format', getattr(context, attrs_fmt.dest('datetime_format'), None)),
+
+                    ('true_literals', getattr(context, attrs_fmt.dest('true_literals'), None)),
+                    ('false_literals', getattr(context, attrs_fmt.dest('false_literals'), None)),
 
                     ('csv_dialect', getattr(context, attrs_fmt.dest('csv_dialect'), None)),
 

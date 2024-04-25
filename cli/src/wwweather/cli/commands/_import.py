@@ -86,6 +86,11 @@ def setargs_records_import(parser: ArgumentParser):
       * `feed_datetime_format` - datetime formatting pattern in :func:`time.strftime`/:func:`time.strptime` format
       (defaults to the :attr:`CSVOpts.DEFAULT_FORMATTING_PARAMS`)
 
+      * `feed_true_literals` - boolean `True` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_TRUE_LITERALS`)
+      * `feed_false_literals` - boolean `False` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_FALSE_LITERALS`)
+
       * `feed_csv_dialect` - CSV dialect name (from :func:`csv.list_dialects`)
         (defaults to the :attr:`CSVOpts.DEFAULT_DIALECT`)
 
@@ -166,6 +171,11 @@ def run_records_import(context: AppContext):
 
       * `feed_csv_datetime_format` - datetime formatting pattern in :func:`time.strftime`/:func:`time.strptime` format
         (defaults to the :attr:`CSVOpts.DEFAULT_FORMATTING_PARAMS`)
+
+      * `feed_true_literals` - boolean `True` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_TRUE_LITERALS`)
+      * `feed_false_literals` - boolean `False` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_FALSE_LITERALS`)
 
       * `feed_csv_csv_dialect` - CSV dialect name (from :func:`csv.list_dialects`)
         (defaults to the :attr:`CSVOpts.DEFAULT_DIALECT`)

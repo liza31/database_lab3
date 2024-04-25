@@ -69,6 +69,8 @@ class CSVRecordsDumper(ABCRecordsDumper):
 
         # Additional data columns
 
+        'air_quality_acceptable',
+
         'condition_text'
     ]
     """
@@ -166,7 +168,11 @@ class CSVRecordsDumper(ABCRecordsDumper):
                 # -- Air quality indexes data columns
 
                 ('air_quality_us-epa-index', air_quality.aqi_epa),
-                ('air_quality_gb-defra-index', air_quality.aqi_defra)
+                ('air_quality_gb-defra-index', air_quality.aqi_defra),
+
+                # Additional data columns
+
+                ('air_quality_acceptable', self._csv_opts.bool_2_str(air_quality.acceptable))
 
             ])
 

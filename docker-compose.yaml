@@ -60,11 +60,11 @@ services:
       - postgres-import_export
 
   cli_postgres-import_origin:
-    image: wwweather/cli:0.2.0.ext0
+    image: wwweather/cli:0.3.0.ext0
     build:
       context: ./cli
       dockerfile: Dockerfile
-    container_name: wwweather-cli_0.2.0_postgres-import_origin
+    container_name: wwweather-cli_0.3.0_postgres-import_origin
     networks:
       - wwweather-network
     volumes:
@@ -92,11 +92,11 @@ services:
       - postgres-import_origin
 
   cli_postgres-export:
-    image: wwweather/cli:0.2.0.ext0
+    image: wwweather/cli:0.3.0.ext0
     build:
       context: ./cli
       dockerfile: Dockerfile
-    container_name: wwweather-cli_0.2.0_postgres-export
+    container_name: wwweather-cli_0.3.0_postgres-export
     networks:
       - wwweather-network
     volumes:
@@ -124,11 +124,11 @@ services:
       - postgres-export
 
   cli_postgres-import_export:
-    image: wwweather/cli:0.2.0.ext0
+    image: wwweather/cli:0.3.0.ext0
     build:
       context: ./cli
       dockerfile: Dockerfile
-    container_name: wwweather-cli_0.2.0_postgres-import_export
+    container_name: wwweather-cli_0.3.0_postgres-import_export
     networks:
       - wwweather-network
     volumes:

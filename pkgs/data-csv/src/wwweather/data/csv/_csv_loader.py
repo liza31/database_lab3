@@ -131,6 +131,12 @@ class CSVRecordsLoader(ABCRecordsLoader):
                 ('aqi_defra',
                  None if data.get('air_quality_gb-defra-index') is None else int(data['air_quality_gb-defra-index'])),
 
+                # -- Additional data kwargs
+
+                ('acceptable',
+                 None if data.get('air_quality_acceptable') is None
+                 else self._csv_opts.parse_bool(data['air_quality_acceptable']))
+
             ] if val is not None
         }
 

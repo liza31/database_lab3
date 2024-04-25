@@ -74,6 +74,11 @@ def setargs_records_export(parser: ArgumentParser):
       * `dest_datetime_format` - datetime formatting pattern in :func:`time.strftime`/:func:`time.strptime` format
         (defaults to the :attr:`CSVOpts.DEFAULT_FORMATTING_PARAMS`)
 
+      * `dest_true_literals` - boolean `True` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_TRUE_LITERALS`)
+      * `dest_false_literals` - boolean `False` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_FALSE_LITERALS`)
+
       * `dest_csv_dialect` - CSV dialect name (from :func:`csv.list_dialects`)
         (defaults to the :attr:`CSVOpts.DEFAULT_DIALECT`)
 
@@ -139,6 +144,11 @@ def run_records_export(context: AppContext):
 
       * `dest_csv_dialect` - CSV dialect name (from :func:`csv.list_dialects`)
         (defaults to the :attr:`CSVOpts.DEFAULT_DIALECT`)
+
+      * `dest_true_literals` - boolean `True` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_TRUE_LITERALS`)
+      * `dest_false_literals` - boolean `False` literals collection (all lowercase, first is taken for dumping,
+        defaults to the :attr:`CSVOpts.DEFAULT_FALSE_LITERALS`)
 
       * formatting parameters arguments set
         (all defaults to values taken from the :attr:`CSVOpts.DEFAULT_FORMATTING_PARAMS`):

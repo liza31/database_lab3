@@ -52,6 +52,26 @@ class _DefaultWeatherRecordsFmtOpts(metaclass=ABCMeta):
     Time format in :func:`time.strftime` format
     """
 
+    DEFAULT_TRUE_LITERAL: ClassVar[str] = "Yes"
+    """
+    Default boolean `True` literal
+    """
+
+    true_literal: str = field(default=DEFAULT_TRUE_LITERAL)
+    """
+    Boolean `True` literal
+    """
+
+    DEFAULT_FALSE_LITERAL: ClassVar[str] = "No"
+    """
+    Default boolean `False` literal
+    """
+
+    false_literal: str = field(default=DEFAULT_FALSE_LITERAL)
+    """
+    Boolean `False` literal
+    """
+
     DEFAULT_POSITION_PATTERN: ClassVar[str] = "(%(lat)7.2f, %(lng)7.2f)"
     """
     Default formated string pattern for the location position. 
@@ -219,6 +239,8 @@ class DefaultWeatherRecordsFormatter(ABCWeatherRecordsFormatter, _DefaultWeather
         "AQI (by US EPA scale)",
         "AQI (by UK DEFRA scale)",
 
+        "Air quality acceptable",
+
         SEPARATING_LINE,
 
         # Additional data rows headers
@@ -317,7 +339,10 @@ class DefaultWeatherRecordsFormatter(ABCWeatherRecordsFormatter, _DefaultWeather
                             if record.air_quality.toxics is not None else tuple(),
                             (
                                 record.air_quality.aqi_epa,
-                                record.air_quality.aqi_defra
+                                record.air_quality.aqi_defra,
+
+                                None if record.air_quality.acceptable is None else
+                                self.true_literal if record.air_quality.acceptable else self.false_literal
                             )
                         ) if record.air_quality is not None else tuple()),
 
