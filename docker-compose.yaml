@@ -28,7 +28,7 @@ services:
       - postgres-import_export
 
   alembic_postgres-upgrade:
-    image: wwweather/exts/alembic_unlinked:ext0
+    image: wwweather/exts/alembic_unlinked:ext1
     build:
       context: ./alembic
       dockerfile: unlinked.Dockerfile
@@ -60,7 +60,7 @@ services:
       - postgres-import_export
 
   cli_postgres-import_origin:
-    image: wwweather/cli:0.3.0.ext0
+    image: wwweather/cli:0.3.0.ext1
     build:
       context: ./cli
       dockerfile: Dockerfile
@@ -92,7 +92,7 @@ services:
       - postgres-import_origin
 
   cli_postgres-export:
-    image: wwweather/cli:0.3.0.ext0
+    image: wwweather/cli:0.3.0.ext1
     build:
       context: ./cli
       dockerfile: Dockerfile
@@ -124,7 +124,7 @@ services:
       - postgres-export
 
   cli_postgres-import_export:
-    image: wwweather/cli:0.3.0.ext0
+    image: wwweather/cli:0.3.0.ext1
     build:
       context: ./cli
       dockerfile: Dockerfile
@@ -155,6 +155,163 @@ services:
     profiles:
       - postgres-import_export
 
+  db_mysql:
+    image: mysql:latest
+    container_name: wwweather-db_mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - wwweather-network
+    volumes:
+      - db_mysql-data:/var/lib/mysql
+    secrets:
+      - db_mysql-root_password
+      - db_mysql-password
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_mysql-root_password
+      MYSQL_DATABASE: wwweather_db
+      MYSQL_USER: liza31
+      MYSQL_PASSWORD_FILE: /run/secrets/db_mysql-password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-s" ]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - mysql
+      - mysql-upgrade
+      - mysql-import_origin
+      - mysql-export
+      - mysql-import_export
+
+  alembic_mysql-upgrade:
+    image: wwweather/exts/alembic_unlinked:ext1
+    build:
+      context: ./alembic
+      dockerfile: unlinked.Dockerfile
+    container_name: wwweather-alembic_unlinked_mysql-upgrade
+    networks:
+      - wwweather-network
+    volumes:
+      - ./alembic/alembic.ini:/wwweather/alembic/alembic.ini:ro
+      - ./alembic/versions:/wwweather/alembic/versions:ro
+    secrets:
+      - db_mysql-password
+    command: [
+      "-x", "db.sqlalchemy.dialect=mysql",
+      "-x", "db.sqlalchemy.driver=pymysql",
+      "-x", "db.server.host=db_mysql",
+      "-x", "db.server.port=3306",
+      "-x", "db.dbname=wwweather_db",
+      "-x", "db.user=liza31",
+      "-x", "db.pass=%/run/secrets/db_mysql-password",
+      "upgrade", "head"
+    ]
+    depends_on:
+      db_mysql:
+        condition: service_healthy
+    profiles:
+      - mysql-upgrade
+      - mysql-import_origin
+      - mysql-export
+      - mysql-import_export
+
+  cli_mysql-import_origin:
+    image: wwweather/cli:0.3.0.ext1
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    container_name: wwweather-cli_0.3.0_mysql-import_origin
+    networks:
+      - wwweather-network
+    volumes:
+      - ./.data:/data:ro
+    secrets:
+      - db_mysql-password
+    command: [
+      "--db.sqlalchemy.dialect", "mysql",
+      "--db.sqlalchemy.driver", "pymysql",
+      "--db.server.host", "db_mysql",
+      "--db.server.port", "3306",
+      "--db.dbname", "wwweather_db",
+      "--db.user", "liza31",
+      "--db.pass", "%/run/secrets/db_mysql-password",
+      "import",
+      "/data/GlobalWeatherRepository.csv",
+      "--feed.encoding", "utf-8"
+    ]
+    depends_on:
+      db_mysql:
+        condition: service_healthy
+      alembic_mysql-upgrade:
+        condition: service_completed_successfully
+    profiles:
+      - mysql-import_origin
+
+  cli_mysql-export:
+    image: wwweather/cli:0.3.0.ext1
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    container_name: wwweather-cli_0.3.0_mysql-export
+    networks:
+      - wwweather-network
+    volumes:
+      - ./.out:/out
+    secrets:
+      - db_mysql-password
+    command: [
+      "--db.sqlalchemy.dialect", "mysql",
+      "--db.sqlalchemy.driver", "pymysql",
+      "--db.server.host", "db_mysql",
+      "--db.server.port", "3306",
+      "--db.dbname", "wwweather_db",
+      "--db.user", "liza31",
+      "--db.pass", "%/run/secrets/db_mysql-password",
+      "export",
+      "/out/wwweather_db-export.csv",
+      "--dest.encoding", "utf-8"
+    ]
+    depends_on:
+      db_mysql:
+        condition: service_healthy
+      alembic_mysql-upgrade:
+        condition: service_completed_successfully
+    profiles:
+      - mysql-export
+
+  cli_mysql-import_export:
+    image: wwweather/cli:0.3.0.ext1
+    build:
+      context: ./cli
+      dockerfile: Dockerfile
+    container_name: wwweather-cli_0.3.0_mysql-import_export
+    networks:
+      - wwweather-network
+    volumes:
+      - ./.out:/out:ro
+    secrets:
+      - db_mysql-password
+    command: [
+      "--db.sqlalchemy.dialect", "mysql",
+      "--db.sqlalchemy.driver", "pymysql",
+      "--db.server.host", "db_mysql",
+      "--db.server.port", "3306",
+      "--db.dbname", "wwweather_db",
+      "--db.user", "liza31",
+      "--db.pass", "%/run/secrets/db_mysql-password",
+      "import",
+      "/out/wwweather_db-export.csv",
+      "--feed.encoding", "utf-8"
+    ]
+    depends_on:
+      db_mysql:
+        condition: service_healthy
+      alembic_mysql-upgrade:
+        condition: service_completed_successfully
+    profiles:
+      - mysql-import_export
+
 
 networks:
   wwweather-network:
@@ -162,8 +319,13 @@ networks:
 
 volumes:
   db_postgres-data:
+  db_mysql-data:
 
 
 secrets:
   db_postgres-password:
-    file: ./.secrets/db_postgres-password.txt
+    file: .secrets/db_postgres-password.txt
+  db_mysql-password:
+    file: .secrets/db_mysql-password.txt
+  db_mysql-root_password:
+    file: .secrets/db_mysql-root_password.txt

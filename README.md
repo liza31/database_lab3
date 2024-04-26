@@ -293,3 +293,59 @@ and filling it with generated values.
    ```shell
    docker compose --profile postgres-upgrade up -d --force-recreate
    ```
+
+### Step 04
+
+**Database schema:** `1-to-1 tables + generic column`
+**Database server(s):** `PostgreSQL`, `MySQL`  
+**WWWeather.Core version:** `0.3.0`
+
+In the current step we will migrate the entire application database 
+from the **PostgreSQL** server to the new **MySQL** server.
+To do so, we will export all the data from the **PostgreSQL** database into a CSV file, then initialize 
+a new **MySQL** database, applying to it the same migrations as for the original **PostgreSQL** database, 
+and import all the records from the previously exported CSV file.
+
+1. Re-build a **Docker Compose** for the current configuration:
+
+   ```shell
+   docker-compose build --no-cache
+   ```
+
+2. Run **Docker Compose** `postgres-export` profile to export all data 
+   from the **PostgreSQL** database into the `.out/wwweather_db-export.csv` file:
+
+   ```shell
+   docker compose --profile postgres-export up -d --force-recreate
+   ```
+
+3. Run **Docker Compose** `mysql-import_export` profile to initialize the **MySQL** database, 
+   apply all the migrations up to the `model-0.3.0` revision to it and perform weather records import 
+   from the previously exported `.out/wwweather_db-export.csv` file:
+
+   ```shell
+   docker compose --profile mysql-import_export up -d --force-recreate
+   ```
+
+#### New Docker Compose profiles
+
+In addition to the profiles described in the [**Step 01**](#step-01), the [compose configuration](docker-compose.yaml)
+now contains also a new group of profiles, similar to the previous ones, but for the **MySQL** database server:
+
+* `mysql` — 
+  run a **MySQL** server for the application database
+
+* `mysql-upgrade` — 
+  run **Alembic** `upgrade` command to upgrade a **MySQL** hema to the latest available version
+
+* `mysql-import_origin` — 
+  run **WWWeather.CLI** `import` command to import weather records 
+  from the `.data/GlobalWeatherRepoitory.csv` file into the application database
+
+* `mysql-export` — 
+  run **WWWeather.CLI** `export` command to export weather records 
+  from the application database into the `.out/wwweather_db-export.csv` file
+
+* `mysql-import_origin` — 
+  run **WWWeather.CLI** `import` command to import weather records 
+  from the `.out/wwweather_db-export.csv` file into the application database
